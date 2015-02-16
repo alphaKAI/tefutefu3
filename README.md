@@ -27,7 +27,7 @@ Yet Another Twitter Bot writteln in D.
 ```
 
   
-* lanch
+* launch
 
 ```zsh
 % dub
