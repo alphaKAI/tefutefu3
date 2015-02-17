@@ -2,6 +2,7 @@ import std.json,
        std.conv,
        std.regex;
 import util;
+
 mixin template StatusTemplate(){
   class Status{
     mixin Util;
@@ -17,12 +18,9 @@ mixin template StatusTemplate(){
     string[string] user;
 
     this(JSONValue json){
-      user = [
-        "name"        : "",
-        "screen_name" : "",
-        "id_str"      : ""];
-      
-      
+      user = ["name"        : "",
+              "screen_name" : "",
+              "id_str"      : ""];
 
       if("event" in json.object){
         kind  = "event";

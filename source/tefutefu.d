@@ -38,7 +38,8 @@ class Tefutefu{
   void start(){
     foreach(status; t4d.stream){
       //get friends data from data at firsttime
-      if(firstTime && status.to!string.match(regex(r"\{.*\}")) && status.to!string.match(regex(r"friends"))){
+      if(firstTime && status.to!string.match(regex(r"\{.*\}")) 
+                   && status.to!string.match(regex(r"friends"))){
         tefutefu.friends = getJsonArrayData(parseJSON(status.to!string), "friends").dup;
         firstTime = false;
       } else if(status.to!string.match(regex(r"\{.*\}"))){
@@ -57,6 +58,7 @@ class Tefutefu{
         if(status.isReply(tefutefu.botID)){//ifReply
           sendReply(status);
         } else {
+          //Collect tweet and study for markov
           //debug
           //writeln("[", status.kind ,"] [@", status.user["screen_name"], " - ", status.text, "]");
         }
@@ -69,15 +71,15 @@ class Tefutefu{
         case "follow":
           if(status.target == tefutefu.botID){
             writeln("[event - AUTO Folloback] ", tefutefu.botID, " -> ", status.target);
-            //t4d.request("POST", "friendships/create.json", ["screen_name" : status.source]);
-            //t4d.request("POST", "statuses/update.json", ["status" : "@" ~ status.target ~ " さん フォローありがとう！ これからよろしくお願いしますっ！"]);
+            //follow(status.source);
+            //tweet("@" ~ status.target ~ " さん フォローありがとう！ これからよろしくお願いしますっ！");
             //Idea : フォロー返すときなどのメッセージをscript.yamlに定義してそれを読む
           }
           break;
         case "unfollow":
           if(status.target == tefutefu.botID){
             writeln("[event - AUTO Remove]", tefutefu.botID, " -> ", status.target);
-            //t4d.request("POST", "friendships/destroy.json", ["screen_name" : status.source]);
+            //remove(status.source);
           }
           break;
       }
@@ -96,6 +98,14 @@ class Tefutefu{
       else
         t4d.request("POST", "statuses/update.json", ["status"                : text,
                                                      "in_reply_to_status_id" : inReplyToStatusId]);
+    }
+
+    void follow(string target){
+      t4d.request("POST", "friendships/create.json", ["screen_name" : target]);
+    }
+
+    void remove(string target){
+      t4d.request("POST", "friendships/destroy.json", ["screen_name" : target]);
     }
   }
 }

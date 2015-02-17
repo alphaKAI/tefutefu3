@@ -31,5 +31,5 @@ void main(){
   writeln("Before next step : You must configure \'./config/setting.json\'");
   writeln("Next step :");
   writeln(" $ dub");
-  writeln("    => Tefutefu will be being build and lanched");
+  writeln("    => Tefutefu will be being build and launched");
 }
