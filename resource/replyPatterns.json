@@ -1,0 +1,18 @@
+{
+  "otukare" : {
+    "regex" : "/つかれた|疲れた/",
+    "text"  : "お疲れ様です♪"
+  },
+  "oruka" : {
+    "regex" : "/BOTNAME.*(お|い)るか/",
+    "text"  : "おるでｗ"
+  },
+  "okaeri" : {
+    "regex" : "/帰宅|きたく|ただいま/",
+    "text"  : "おかえりなさい♪ USERNAME さん"
+  },
+  "ohayou" : {
+    "regex" : "/おはよ|起きた/",
+    "text"  : "おはようございます♪ USERNAME"
+  }
+}

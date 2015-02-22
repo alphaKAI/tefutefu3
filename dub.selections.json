@@ -1,6 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"twitter4d": "0.0.4"
+		"weatherd": "1.0.2",
+		"twitter4d": "0.0.5",
+		"dyaml": "0.5.0",
+		"tinyendian": "0.1.1"
 	}
 }

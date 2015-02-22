@@ -18,7 +18,8 @@ void main(){
         "  \"consumerKey\"       : \"Your Consumer Key\",",
         "  \"consumerSecret\"    : \"Your Consumer Secret\",",
         "  \"accessToken\"       : \"Your Access Token\",",
-        "  \"accessTokenSecret\" : \"Your Access Token Secret\"",
+        "  \"accessTokenSecret\" : \"Your Access Token Secret\",",
+        "  \"admins\"            : []\"",
       "}"];
     
     foreach(line; fileLines)

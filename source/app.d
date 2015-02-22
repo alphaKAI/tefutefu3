@@ -5,11 +5,10 @@
   THE MIT LICENSE. 
 */
 
-import std.stdio;
 import twitter4d;
 import tefutefu;
 
 void main(){
-  Tefutefu tefutefu = new Tefutefu();
+  Tefutefu tefutefu = new Tefutefu;
   tefutefu.start;
 }

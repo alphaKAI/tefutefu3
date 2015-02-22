@@ -1,3 +1,6 @@
+import status;
+/*
 interface Plugin{
-  bool match(string);
-}
+  bool match(Status);
+  bool process(Status);
+}*/

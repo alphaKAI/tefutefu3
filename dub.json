@@ -5,6 +5,8 @@
 	"authors": ["alphaKAI"],
   "license": "MIT",
 	"dependencies": {
-    "twitter4d":"*"
-	}
+    "twitter4d":"*",
+    "dyaml": { "version" : "~>0.5.0"},
+    "weatherd" : "*"
+  }
 }
