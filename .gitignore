@@ -9,3 +9,4 @@ setup
 config/setting.json
 .*\.sw*
 */.*\.sw*
+primary_area.xml
