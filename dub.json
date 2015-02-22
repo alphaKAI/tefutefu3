@@ -1,10 +1,10 @@
 {
-	"name": "tefutefu3",
-	"description": "Yet Another Twitter Bot",
-	"copyright": "Copyright © 2015, alphaKAI",
-	"authors": ["alphaKAI"],
+  "name": "tefutefu3",
+  "description": "Yet Another Twitter Bot",
+  "copyright": "Copyright © 2015, alphaKAI",
+  "authors": ["alphaKAI"],
   "license": "MIT",
-	"dependencies": {
+  "dependencies": {
     "twitter4d":"*",
     "weatherd" : "*"
   }
