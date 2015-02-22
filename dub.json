@@ -6,7 +6,6 @@
   "license": "MIT",
 	"dependencies": {
     "twitter4d":"*",
-    "dyaml": { "version" : "~>0.5.0"},
     "weatherd" : "*"
   }
 }
