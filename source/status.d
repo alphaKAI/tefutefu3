@@ -15,7 +15,6 @@ import util;
 class Status{
   mixin Util;
   string kind;//event or status
-  bool forMe;//flag of event target
   string text,
          in_reply_to_status_id;
   string event,
@@ -32,20 +31,19 @@ class Status{
     if("event" in json.object){
       kind  = "event";
       event  = getJsonData(json, "event");
-      target = getJsonData(json.object["target"], "screen_name");
-      source = getJsonData(json.object["source"], "screen_name");
+      target = json.object["target"].object["screen_name"].str;
+      source = json.object["source"].object["screen_name"].str;
     } else if("text" in json.object){
       kind = "status"; 
       foreach(key; user.keys)
-        user[key] = key in json.object["user"].object ? getJsonData(json.object["user"], key) : "null";
+        user[key] = key in json.object["user"].object ? json.object["user"].object[key].str : "null";
       in_reply_to_status_id = getJsonData(json, "id_str");
-      text                  = getJsonData(json, "text");
+      text                  = json.object["text"].str;
       _protected            = getJsonData(json.object["user"], "protected").to!bool;
     }
   }
 
   bool isReply(string botID){
-    writeln(typeid(text.match(regex(r"@" ~ botID))));
     return text.match(regex(r"^@" ~ botID)).empty ? false: true;
   }
 }

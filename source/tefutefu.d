@@ -72,7 +72,7 @@ class Tefutefu{
       if("event" == status.kind)
         processEvent(status);
       else if("status" == status.kind && find(status.user["id_str"], tefutefu.friends)){ 
-        if(status.isReply(tefutefu.botID)){//status.text.match(regex(r"^@" ~ tefutefu.botID))){//ifReply
+        if(status.isReply(tefutefu.botID)){
           writeln("[Reply recived] @" ~ status.user["screen_name"] ~ " -> @" ~ tefutefu.botID ~ " : " ~ status.text);
           sendReply(status);
         } else {
@@ -114,9 +114,10 @@ class Tefutefu{
           case "stop":
             writeln("[admin command] - stop ", currentTime);
             tweet(eventReply.get("stop", ["DATE" : currentTime]));
-            //exit
+            //Todo: exit
             execed = true; 
             break;
+          //Todo : reboot
           default: break;
         }
       }

@@ -47,7 +47,7 @@ class Reply{
 
   string[] functions;
   static string[] funcs = ["weather",
-    "favoreyo"];
+                           "omikuji"];
   string[string][string] replyPattern;
   string[string][string] reactionPattern;
   Twitter4D t4d;
