@@ -97,7 +97,7 @@ class Reply{
     writeln("[start replyParse]");
     foreach(pattern; reactionPattern){
       writeln("[replyParse] - [check pattern] => ", pattern);
-      if(match(status.text, regex(r"" ~ pattern["regex"]))){
+      if(match(status.text, regex(r"" ~ convWithPattern(pattern["regex"], ["BOTNAME" : "てふてふ"]).removechars("/")))){
         writeln("[replyParse] -> found pattern => ", pattern);
         tweet("@" ~ status.user["screen_name"] ~ " " ~ convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]));
         break;
