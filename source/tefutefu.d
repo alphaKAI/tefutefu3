@@ -84,21 +84,23 @@ class Tefutefu{
     }
 
     void processEvent(Status status){
-      writeln("[event - ", status.event, "] ", status.source, " -> ", status.target);
-      final switch(status.kind){
+      writeln("[event - ", status.event, "] ", status.source["screen_name"], " -> ", status.target["screen_name"]);
+      switch(status.event){
         case "follow":
-          if(status.target == tefutefu.botID){
-            writeln("[event - AUTO Folloback] ", tefutefu.botID, " -> ", status.target);
-            follow(status.source);
-            tweet(eventReply.get("follow", ["USERNAME" : "@" ~ status.source ~ " " ~ status.user["name"]]));
+          if(status.target["screen_name"] == tefutefu.botID){
+            writeln("[event - AUTO Folloback] ", tefutefu.botID, " -> ", status.target["screen_name"]);
+            follow(status.source["screen_name"]);
+            tweet(eventReply.get("follow", ["USERNAME" : "@" ~ status.source["screen_name"] ~ " " ~ status.user["name"]]));
+            tefutefu.friends ~= status.source["id_str"];
           }
           break;
         case "unfollow":
-          if(status.target == tefutefu.botID){
-            writeln("[event - AUTO Remove]", tefutefu.botID, " -> ", status.target);
-            remove(status.source);
+          if(status.target["screen_name"] == tefutefu.botID){
+            writeln("[event - AUTO Remove]", tefutefu.botID, " -> ", status.target["screen_name"]);
+            unfollow(status.source["screen_name"]);
           }
           break;
+        default: break;
       }
     }
 
@@ -141,7 +143,7 @@ class Tefutefu{
       t4d.request("POST", "friendships/create.json", ["screen_name" : target]);
     }
 
-    void remove(string target){
+    void unfollow(string target){
       t4d.request("POST", "friendships/destroy.json", ["screen_name" : target]);
     }
   }

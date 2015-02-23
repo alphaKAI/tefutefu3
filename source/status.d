@@ -17,22 +17,28 @@ class Status{
   string kind;//event or status
   string text,
          in_reply_to_status_id;
-  string event,
-         target,
-         source;           
+  string event;
   bool _protected;
   string[string] user;
+  string[string] source;
+  string[string] target;
 
   this(JSONValue json){
     user = ["name"        : "",
             "screen_name" : "",
             "id_str"      : ""];
+    source = user.dup;
+    target = user.dup;
 
     if("event" in json.object){
       kind  = "event";
       event  = getJsonData(json, "event");
-      target = json.object["target"].object["screen_name"].str;
-      source = json.object["source"].object["screen_name"].str;
+
+      foreach(key; source.keys)
+        source[key] = key in json.object["source"].object ? json.object["source"].object[key].str : "null";
+      foreach(key; target.keys)
+        target[key] = key in json.object["target"].object ? json.object["target"].object[key].str : "null";
+
     } else if("text" in json.object){
       kind = "status"; 
       foreach(key; user.keys)
