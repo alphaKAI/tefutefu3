@@ -83,6 +83,10 @@ class Reply{
   void parseStatus(Status status){
    writeln("[start parseStatus]");
     foreach(pattern; replyPattern){
+      if(status.text.match(regex(r"@")) || status.text.match(regex(r"^@"))){
+        writeln("[parseStatus] - Ignore this status");
+        return;
+      }
       writeln("[parseStatus] - [check pattern] => ", pattern);
       if(match(status.text, regex(r"" ~ convWithPattern(pattern["regex"], ["BOTNAME" : "てふてふ"]).removechars("/")))){
         writeln("[parseStatus] -> found pattern => ", pattern);
@@ -104,7 +108,7 @@ class Reply{
       }
     }
 
-    if(match(status.text, regex(r"(今日|明日|明後日).*天気"))){//weather
+    if(match(status.text, regex(r"(今日|明日|明後日)?.*天気"))){//weather
       writeln("[parseStatus] -> [weather]");
       string pref,
              city;
@@ -128,7 +132,7 @@ class Reply{
         return;
       } else {
         string[] dateLabels = ["今日", "明日", "明後日"];
-        string dateLabel;
+        string dateLabel = "今日";
         Weather weatherStruct;
         foreach(date; dateLabels){
           if(match(status.text, regex(r"" ~ date))){
