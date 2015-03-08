@@ -204,6 +204,10 @@ class Reply{
       tweet("@" ~ status.user["screen_name"] ~ " " ~ result, status.in_reply_to_status_id);
     } else if(status.text.match(regex(r"study"))){
       string newWord = status.text.split("study")[$ - 1][1..$];//[1..$] means : delete space
+      if(newWord.length == 0){
+        tweet(convWithPattern("@USERNAME 空白は学習できないの！ ごめんね！", ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
+        return;
+      }
 
       foreach(elem; blackList){
         if(newWord.match(regex(r"" ~ elem))){
@@ -226,6 +230,7 @@ class Reply{
     } else {
       Mt19937 mt;
       mt.seed(unpredictableSeed);
+      writeln("[default]");
       tweet(convWithPattern("@USERNAME " ~ studyList[mt.front % studyList.length + 1], ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
     }
   }
