@@ -10,3 +10,5 @@ config/setting.json
 .*\.sw*
 */.*\.sw*
 primary_area.xml
+resource/blackList.csv
+resource/study.csv

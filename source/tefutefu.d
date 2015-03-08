@@ -11,8 +11,7 @@ import std.algorithm,
 import core.thread;
 import reply,
        status,
-       util,
-       plugin;
+       util;
 
 class Tefutefu{
   mixin Util;
@@ -22,7 +21,7 @@ class Tefutefu{
     string[] functions;
     string[] friends;
   }
-  
+
   //Define class vals
   private{
     Twitter4D  t4d;
@@ -39,7 +38,7 @@ class Tefutefu{
     eventReply = new EventReply;
     reply      = new Reply(t4d);
     tefutefu.botID = getJsonData(parseJSON(t4d.request("GET", "account/verify_credentials.json")), "screen_name");
-  
+
     if("admins" in setting.object)
       admins = getJsonArrayData(setting, "admins");
     if(admins.length){
@@ -55,7 +54,7 @@ class Tefutefu{
     tweet(eventReply.get("boot", ["DATE" : currentTime]));
     foreach(status; t4d.stream){
       //get friends data from data at firsttime
-      if(firstTime && status.to!string.match(regex(r"\{.*\}")) 
+      if(firstTime && status.to!string.match(regex(r"\{.*\}"))
                    && status.to!string.match(regex(r"friends"))){
         tefutefu.friends = getJsonArrayData(parseJSON(status.to!string), "friends").dup;
         firstTime = false;
@@ -71,13 +70,12 @@ class Tefutefu{
     void processStatus(Status status){
       if("event" == status.kind)
         processEvent(status);
-      else if("status" == status.kind && find(status.user["id_str"], tefutefu.friends)){ 
+      else if("status" == status.kind && find(status.user["id_str"], tefutefu.friends)){
         if(status.isReply(tefutefu.botID)){
           writeln("[Reply recived] @" ~ status.user["screen_name"] ~ " -> @" ~ tefutefu.botID ~ " : " ~ status.text);
           sendReply(status);
         } else {
           reply.parseStatus(status);
-          //Todo : Collect tweet and study for markov
           writeln("[", status.kind ,"] [@", status.user["screen_name"], " - ", status.text, "]");
         }
       }
@@ -111,26 +109,26 @@ class Tefutefu{
           case "say":
             writeln("[admin command] - say : ", status.text.split[2..$].join);
             tweet("管理者より " ~ status.text.split[2..$].join);
-            execed = true; 
+            execed = true;
             break;
           case "stop":
             writeln("[admin command] - stop ", currentTime);
             tweet(eventReply.get("stop", ["DATE" : currentTime]));
             //Todo: exit
-            execed = true; 
+            execed = true;
             break;
           //Todo : reboot
           default: break;
         }
       }
-      
+
       if(!execed)
         reply.replyParse(status);
     }
   }
 
   //Twitter API
-  private{ 
+  private{
     void tweet(string text, string inReplyToStatusId = null){
       if(inReplyToStatusId == null)
         t4d.request("POST", "statuses/update.json", ["status" : text]);

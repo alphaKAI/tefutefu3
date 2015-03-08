@@ -2,7 +2,7 @@
   - Tefutefu3 -
   Yet Another TwitterBot.
   Copyright (C) alphaKAI 2015 http://alpha-kai-net.info
-  THE MIT LICENSE. 
+  THE MIT LICENSE.
 */
 
 import twitter4d;

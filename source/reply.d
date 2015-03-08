@@ -4,9 +4,11 @@ import std.conv,
        std.file,
        std.regex,
        std.stdio,
+       std.array,
        std.string,
        std.random,
-       std.datetime;
+       std.datetime,
+       std.algorithm;
 import util,
        status;
 import weatherd;
@@ -37,7 +39,7 @@ class EventReply{
     assert(method in lists);
   } body{
     string str = lists[method];
-    
+
     return convWithPattern(str, convList);
   }
 }
@@ -45,14 +47,20 @@ class EventReply{
 class Reply{
   mixin Util;
 
-  string[] functions;
   static string[] funcs = ["weather",
-                           "omikuji"];
-  string[string][string] replyPattern;
-  string[string][string] reactionPattern;
+                           "omikuji",
+                           "study"];
+  string[string][string] replyPattern,
+                         reactionPattern;
+  string blackListPath = "resource/blackList.csv",
+         studyFilePath = "resource/study.csv",
+         tweetFilePath = "resource/tweet.csv";
+  string[] functions,
+           blackList,
+           studyList;
   Twitter4D t4d;
   WeatherD weather;
-  
+
   struct Weather{
       string place,
              date,
@@ -60,7 +68,7 @@ class Reply{
              tempMax,
              tempMin;
   }
- 
+
   this(Twitter4D twitter4dInstance){
     JSONValue replys    = parseJSON(readFile("resource/replyPatterns.json")),
               reactions = parseJSON(readFile("resource/reactionPatterns.json"));
@@ -78,6 +86,14 @@ class Reply{
 
     t4d = twitter4dInstance;
     weather = new WeatherD;
+
+    if(!exists(blackListPath))
+      writeFile(blackListPath, "");
+    if(!exists(studyFilePath))
+      writeFile(studyFilePath, "");
+
+    blackList = getCsvAsArray(readFile(blackListPath));
+    studyList = getCsvAsArray(readFile(studyFilePath));
   }
 
   void parseStatus(Status status){
@@ -85,14 +101,13 @@ class Reply{
     foreach(pattern; replyPattern){
       if(status.text.match(regex(r"@")) || status.text.match(regex(r"^@"))){
         writeln("[parseStatus] - Ignore this status");
-        return;
-      }
-      writeln("[parseStatus] - [check pattern] => ", pattern);
-      if(match(status.text, regex(r"" ~ convWithPattern(pattern["regex"], ["BOTNAME" : "てふてふ"]).removechars("/")))){
-        writeln("[parseStatus] -> found pattern => ", pattern);
-        writeln("@" ~ status.user["screen_name"] ~ " " ~ convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]), status.in_reply_to_status_id);
-        tweet("@" ~ status.user["screen_name"] ~ " " ~ convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]), status.in_reply_to_status_id);
-        return;
+      } else {
+        writeln("[parseStatus] - [check pattern] => ", pattern);
+        if(match(status.text, regex(r"" ~ convWithPattern(pattern["regex"], ["BOTNAME" : "てふてふ"]).removechars("/")))){
+          writeln("[parseStatus] -> found pattern => ", pattern);
+          writeln("@" ~ status.user["screen_name"] ~ " " ~ convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]), status.in_reply_to_status_id);
+          tweet("@" ~ status.user["screen_name"] ~ " " ~ convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]), status.in_reply_to_status_id);
+        }
       }
     }
   }
@@ -108,7 +123,7 @@ class Reply{
       }
     }
 
-    if(match(status.text, regex(r"(今日|明日|明後日)?.*天気"))){//weather
+    if(status.text.match(regex(r"(今日|明日|明後日)?.*天気"))){//weather
       writeln("[parseStatus] -> [weather]");
       string pref,
              city;
@@ -129,7 +144,6 @@ class Reply{
 
       if(!findFlag){//NotFound the place
         tweet("@" ~ status.user["screen_name"] ~ "地名が登録されていないよ！><", status.in_reply_to_status_id);
-        return;
       } else {
         string[] dateLabels = ["今日", "明日", "明後日"];
         string dateLabel = "今日";
@@ -146,17 +160,16 @@ class Reply{
             weatherStruct.place = pref ~ city;
             weatherStruct.date  = dateLabel ~ "(" ~ getJsonData(forecast, "date") ~ ")";
             weatherStruct.weather = getJsonData(forecast, "telop");
-            weatherStruct.tempMax = getJsonDataWithPath(forecast, "temperature/max") == "null" 
+            weatherStruct.tempMax = getJsonDataWithPath(forecast, "temperature/max") == "null"
               ? "null" : getJsonDataWithPath(forecast, "temperature/max/celsius");
-            weatherStruct.tempMin = getJsonDataWithPath(forecast, "temperature/min") == "null" 
+            weatherStruct.tempMin = getJsonDataWithPath(forecast, "temperature/min") == "null"
               ? "null" : getJsonDataWithPath(forecast, "temperature/min/celsius");
           }
 
           //generateTweet
-          tweet("@" ~  status.user["screen_name"] ~ " " ~ weatherStruct.place ~ "の" ~ weatherStruct.date ~ "の天気は" ~ weatherStruct.weather 
-              ~ (weatherStruct.tempMax == "null" || weatherStruct.tempMin == "null" 
+          tweet("@" ~  status.user["screen_name"] ~ " " ~ weatherStruct.place ~ "の" ~ weatherStruct.date ~ "の天気は" ~ weatherStruct.weather
+              ~ (weatherStruct.tempMax == "null" || weatherStruct.tempMin == "null"
               ? "です♪" : "で 最高気温/最低気温は" ~ weatherStruct.tempMax ~ "/" ~ weatherStruct.tempMin ~ " です♪"), status.in_reply_to_status_id);
-          return;
         }
       }
     } else if(match(status.text, regex(r"おみくじ"))){
@@ -189,9 +202,32 @@ class Reply{
       }
 
       tweet("@" ~ status.user["screen_name"] ~ " " ~ result, status.in_reply_to_status_id);
-      return;
-    }
+    } else if(status.text.match(regex(r"study"))){
+      string newWord = status.text.split("study")[$ - 1][1..$];//[1..$] means : delete space
 
+      foreach(elem; blackList){
+        if(newWord.match(regex(r"" ~ elem))){
+          tweet(convWithPattern("@USERNAME ブラックリストに含まれる単語が含まれていたので破棄しました！ ごめんなさい！", ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
+          return;
+        }
+      }
+
+      foreach(elem; studyList){
+        if(newWord.match(regex(r"" ~ elem))){
+          tweet(convWithPattern("@USERNAME その単語はすでに学習済みでした！", ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
+          return;
+        }
+      }
+
+      writeln("[study] - ", newWord);
+      writeFile(studyFilePath, ", " ~ newWord);
+      tweet(convWithPattern("@USERNAME \"" ~ newWord ~ "\" 学習したよっ♪", ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
+      studyList = getCsvAsArray(readFile(studyFilePath));
+    } else {
+      Mt19937 mt;
+      mt.seed(unpredictableSeed);
+      tweet(convWithPattern("@USERNAME " ~ studyList[mt.front % studyList.length + 1], ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
+    }
   }
 
   private{

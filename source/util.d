@@ -20,11 +20,22 @@ mixin template Util(){
     return buf;
   }
 
+  
+  void writeFile(string fileName, string text, string mode = "d"){
+    if(mode == "d")
+      mode = "a";
+    File(fileName, mode).write(text);
+  }
+
   string readSettingFile(){
     string settingFilePath = "config/setting.json";
     if(!exists(settingFilePath))
       throw new Exception("Please create file of config/setting.json and configure your consumer & access tokens");
     return readFile(settingFilePath);
+  }
+
+  string[] getCsvAsArray(string csv){
+    return csv.split(",").map!(x => x.removechars(" ")).array;
   }
 
   string getJsonData(JSONValue parsedJson, string key){

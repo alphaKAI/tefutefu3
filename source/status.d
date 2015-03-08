@@ -40,7 +40,7 @@ class Status{
         target[key] = key in json.object["target"].object ? json.object["target"].object[key].str : "null";
 
     } else if("text" in json.object){
-      kind = "status"; 
+      kind = "status";
       foreach(key; user.keys)
         user[key] = key in json.object["user"].object ? json.object["user"].object[key].str : "null";
       in_reply_to_status_id = getJsonData(json, "id_str");
