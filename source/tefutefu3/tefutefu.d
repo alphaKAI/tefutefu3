@@ -1,3 +1,4 @@
+module tefutefu3.tefutefu;
 import twitter4d;
 import std.algorithm,
        std.datetime,
@@ -9,9 +10,9 @@ import std.algorithm,
        std.json,
        std.conv;
 import core.thread;
-import reply,
-       status,
-       util;
+import tefutefu3.reply,
+       tefutefu3.status,
+       tefutefu3.util;
 
 class Tefutefu{
   mixin Util;

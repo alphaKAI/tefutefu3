@@ -6,7 +6,7 @@
 */
 
 import twitter4d;
-import tefutefu;
+import tefutefu3.tefutefu;
 
 void main(){
   Tefutefu tefutefu = new Tefutefu;

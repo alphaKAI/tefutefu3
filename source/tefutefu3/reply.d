@@ -1,3 +1,4 @@
+module tefutefu3.reply;
 import twitter4d;
 import std.conv,
        std.json,
@@ -9,8 +10,8 @@ import std.conv,
        std.random,
        std.datetime,
        std.algorithm;
-import util,
-       status;
+import tefutefu3.util,
+       tefutefu3.status;
 import weatherd;
 
 class EventReply{
@@ -35,9 +36,9 @@ class EventReply{
   }
 
   string get(string method, string[string]convList = null)
-  in{
+  in {
     assert(method in lists);
-  } body{
+  } body {
     string str = lists[method];
 
     return convWithPattern(str, convList);
@@ -62,11 +63,11 @@ class Reply{
   WeatherD weather;
 
   struct Weather{
-      string place,
-             date,
-             weather,
-             tempMax,
-             tempMin;
+    string place,
+           date,
+           weather,
+           tempMax,
+           tempMin;
   }
 
   this(Twitter4D twitter4dInstance){
@@ -146,7 +147,7 @@ class Reply{
         tweet("@" ~ status.user["screen_name"] ~ "地名が登録されていないよ！><", status.in_reply_to_status_id);
       } else {
         string[] dateLabels = ["今日", "明日", "明後日"];
-        string dateLabel = "今日";
+        string dateLabel    = "今日";
         Weather weatherStruct;
         foreach(date; dateLabels){
           if(match(status.text, regex(r"" ~ date))){

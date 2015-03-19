@@ -1,3 +1,4 @@
+module tefutefu3.util;
 mixin template Util(){
   string[string] readConfig(){
     string[string] hash;

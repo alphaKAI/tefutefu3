@@ -1,3 +1,4 @@
+module tefutefu3.status;
 import std.json,
        std.conv,
        std.regex;
@@ -10,7 +11,7 @@ import std.algorithm,
        std.file,
        std.json,
        std.conv;
-import util;
+import tefutefu3.util;
 
 class Status{
   mixin Util;
