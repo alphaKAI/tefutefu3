@@ -85,20 +85,6 @@ class Tefutefu{
     void processEvent(Status status){
       writeln("[event - ", status.event, "] ", status.source["screen_name"], " -> ", status.target["screen_name"]);
       switch(status.event){
-        case "follow":
-          if(status.target["screen_name"] == tefutefu.botID){
-            writeln("[event - AUTO Folloback] ", tefutefu.botID, " -> ", status.target["screen_name"]);
-            follow(status.source["screen_name"]);
-            tweet(eventReply.get("follow", ["USERNAME" : "@" ~ status.source["screen_name"] ~ " " ~ status.user["name"]]));
-            tefutefu.friends ~= status.source["id_str"];
-          }
-          break;
-        case "unfollow":
-          if(status.target["screen_name"] == tefutefu.botID){
-            writeln("[event - AUTO Remove]", tefutefu.botID, " -> ", status.target["screen_name"]);
-            unfollow(status.source["screen_name"]);
-          }
-          break;
         default: break;
       }
     }

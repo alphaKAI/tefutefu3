@@ -1,6 +1,5 @@
 {
   "boot"   : "てふてふが起動しました DATE",
   "reboot" : "再起動します DATE",
-  "stop"   : "停止します DATE",
-  "follow" : "USERNAME さん。 フォローありがとうございます"
+  "stop"   : "停止します DATE"
 }
