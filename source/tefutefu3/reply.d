@@ -18,9 +18,9 @@ class EventReply{
   mixin Util;
 
   static string[] keys = ["follow",
-                          "reboot",
-                          "boot",
-                          "stop"];
+    "reboot",
+    "boot",
+    "stop"];
   string[string] lists;
 
   this(){
@@ -36,29 +36,30 @@ class EventReply{
   }
 
   string get(string method, string[string]convList = null)
-  in {
-    assert(method in lists);
-  } body {
-    string str = lists[method];
+    in {
+      assert(method in lists);
+    } body {
+      string str = lists[method];
 
-    return convWithPattern(str, convList);
-  }
+      return convWithPattern(str, convList);
+    }
 }
 
 class Reply{
   mixin Util;
 
   static string[] funcs = ["weather",
-                           "omikuji",
-                           "study"];
+    "omikuji",
+    "study"];
   string[string][string] replyPattern,
-                         reactionPattern;
+    reactionPattern;
   string blackListPath = "resource/blackList.csv",
          studyFilePath = "resource/study.csv",
          tweetFilePath = "resource/tweet.csv";
   string[] functions,
-           blackList,
-           studyList;
+    blackList,
+    studyList;
+  string[] admins;
   Twitter4D t4d;
   WeatherD weather;
 
@@ -70,7 +71,7 @@ class Reply{
            tempMin;
   }
 
-  this(Twitter4D twitter4dInstance){
+  this(Twitter4D twitter4dInstance, string[] argAdmins){
     JSONValue replys    = parseJSON(readFile("resource/replyPatterns.json")),
               reactions = parseJSON(readFile("resource/reactionPatterns.json"));
     functions = replys.object.keys ~ reactions.object.keys ~ funcs;
@@ -85,9 +86,10 @@ class Reply{
         reactionPattern[key][ename] = reactions.object[key].object[ename].to!string.removechars("\"").removechars("\\");
     }
 
-    t4d = twitter4dInstance;
+    t4d     = twitter4dInstance;
     weather = new WeatherD;
-
+    admins  = argAdmins;
+    
     if(!exists(blackListPath))
       writeFile(blackListPath, "");
     if(!exists(studyFilePath))
@@ -98,7 +100,7 @@ class Reply{
   }
 
   void parseStatus(Status status){
-   writeln("[start parseStatus]");
+    writeln("[start parseStatus]");
     foreach(pattern; replyPattern){
       if(status.text.match(regex(r"@")) || status.text.match(regex(r"^@"))){
         writeln("[parseStatus] - Ignore this status");
@@ -162,17 +164,19 @@ class Reply{
             weatherStruct.date  = dateLabel ~ "(" ~ getJsonData(forecast, "date") ~ ")";
             weatherStruct.weather = getJsonData(forecast, "telop");
             weatherStruct.tempMax = getJsonDataWithPath(forecast, "temperature/max") == "null"
-              ? "null" : getJsonDataWithPath(forecast, "temperature/max/celsius");
+              ? "null" : getJsonDataWithPath(forecast, "temperature/max/celsius").removechars("\"");
             weatherStruct.tempMin = getJsonDataWithPath(forecast, "temperature/min") == "null"
-              ? "null" : getJsonDataWithPath(forecast, "temperature/min/celsius");
-          }
+              ? "null" : getJsonDataWithPath(forecast, "temperature/min/celsius").removechars("\"");
 
-          //generateTweet
-          tweet("@" ~  status.user["screen_name"] ~ " " ~ weatherStruct.place ~ "の" ~ weatherStruct.date ~ "の天気は" ~ weatherStruct.weather
-              ~ (weatherStruct.tempMax == "null" || weatherStruct.tempMin == "null"
-              ? "です♪" : "で 最高気温/最低気温は" ~ weatherStruct.tempMax ~ "/" ~ weatherStruct.tempMin ~ " です♪"), status.in_reply_to_status_id);
+            //generateTweet
+            tweet("@" ~  status.user["screen_name"] ~ " " ~ weatherStruct.place ~ "の" ~ weatherStruct.date ~ "の天気は" ~ weatherStruct.weather
+                ~ (weatherStruct.tempMax == "null" || weatherStruct.tempMin == "null"
+                  ? "です♪" : "で 最高気温/最低気温は" ~ weatherStruct.tempMax ~ "/" ~ weatherStruct.tempMin ~ " です♪"), status.in_reply_to_status_id);
+            break;
+          }
         }
       }
+      return;
     } else if(match(status.text, regex(r"おみくじ"))){
       writeln("[parseStatus] -> omikuji");
       Mt19937 mt;
@@ -204,7 +208,34 @@ class Reply{
 
       tweet("@" ~ status.user["screen_name"] ~ " " ~ result, status.in_reply_to_status_id);
     } else if(status.text.match(regex(r"study"))){
-      string newWord = status.text.split("study")[$ - 1][1..$];//[1..$] means : delete space
+      bool adminMode;
+      foreach(admin; admins){
+        if(status.user["screen_name"] == admin){
+          adminMode = true;
+        }
+        if(adminMode)
+          break;
+      }
+
+      if(adminMode){
+        writeln("admin mode is true");
+        bool returnFlag;
+        string[] args = status.text.split;
+        string command = args[2];
+        switch(command){
+          case "list":
+            writeln(":== Words");
+            foreach(elem; studyList)
+              writeln(" - ", elem);
+            returnFlag = true;
+            break;
+          default: break;
+        }
+        if(returnFlag)
+          return;
+      }
+
+      string newWord = status.text.split("study")[$ - 1][1..$].removechars("@");//[1..$] means : delete space
       if(newWord.length == 0){
         tweet(convWithPattern("@USERNAME 空白は学習できないの！ ごめんね！", ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
         return;
@@ -232,7 +263,9 @@ class Reply{
       Mt19937 mt;
       mt.seed(unpredictableSeed);
       writeln("[default]");
-      tweet(convWithPattern("@USERNAME " ~ studyList[mt.front % studyList.length + 1], ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
+      string generatedText = studyList[mt.front % studyList.length];
+      writeln("generatedText => ", generatedText);
+      tweet(convWithPattern("@USERNAME " ~ generatedText, ["USERNAME" : status.user["screen_name"]]), status.in_reply_to_status_id);
     }
   }
 

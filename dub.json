@@ -5,7 +5,7 @@
   "authors": ["alphaKAI"],
   "license": "MIT",
   "dependencies": {
-    "twitter4d":"*",
+    "twitter4d":"~master",
     "weatherd" : "*"
   }
 }

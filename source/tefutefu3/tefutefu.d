@@ -35,18 +35,17 @@ class Tefutefu{
 
   this(){
     JSONValue setting = parseJSON(readFile("config/setting.json"));
-    t4d = new Twitter4D(readConfig);
-    eventReply = new EventReply;
-    reply      = new Reply(t4d);
-    tefutefu.botID = getJsonData(parseJSON(t4d.request("GET", "account/verify_credentials.json")), "screen_name");
-
     if("admins" in setting.object)
       admins = getJsonArrayData(setting, "admins");
+    t4d               = new Twitter4D(readConfig);
+    eventReply        = new EventReply;
+    reply             = new Reply(t4d, admins);
+    tefutefu.botID    = getJsonData(parseJSON(t4d.request("GET", "account/verify_credentials.json")), "screen_name");
+
     if(admins.length){
       writeln("admins");
-      foreach(admin; admins){
+      foreach(admin; admins)
         writeln("  - @", admin);
-      }
     }
   }
 
