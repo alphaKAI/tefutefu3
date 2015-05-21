@@ -18,9 +18,9 @@ class EventReply{
   mixin Util;
 
   static string[] keys = ["follow",
-    "reboot",
-    "boot",
-    "stop"];
+                          "reboot",
+                          "boot",
+                          "stop"];
   string[string] lists;
 
   this(){
@@ -36,23 +36,22 @@ class EventReply{
   }
 
   string get(string method, string[string]convList = null)
-    in {
-      assert(method in lists);
-    } body {
-      string str = lists[method];
-
-      return convWithPattern(str, convList);
-    }
+  in {
+    assert(method in lists);
+  } body {
+    string str = lists[method];
+    return convWithPattern(str, convList);
+  }
 }
 
 class Reply{
   mixin Util;
 
   static string[] funcs = ["weather",
-    "omikuji",
-    "study"];
+                           "omikuji",
+                           "study"];
   string[string][string] replyPattern,
-    reactionPattern;
+                         reactionPattern;
   string blackListPath = "resource/blackList.csv",
          studyFilePath = "resource/study.csv",
          tweetFilePath = "resource/tweet.csv";
@@ -76,15 +75,13 @@ class Reply{
               reactions = parseJSON(readFile("resource/reactionPatterns.json"));
     functions = replys.object.keys ~ reactions.object.keys ~ funcs;
 
-    foreach(key; replys.object.keys){
+    foreach(key; replys.object.keys)
       foreach(ename; ["regex", "text"])
         replyPattern[key][ename] = replys.object[key].object[ename].to!string.removechars("\"").removechars("\\");
-    }
 
-    foreach(key; reactions.object.keys){
+    foreach(key; reactions.object.keys)
       foreach(ename; ["regex", "text"])
         reactionPattern[key][ename] = reactions.object[key].object[ename].to!string.removechars("\"").removechars("\\");
-    }
 
     t4d     = twitter4dInstance;
     weather = new WeatherD;
@@ -102,14 +99,19 @@ class Reply{
   void parseStatus(Status status){
     writeln("[start parseStatus]");
     foreach(pattern; replyPattern){
-      if(status.text.match(regex(r"@")) || status.text.match(regex(r"^@"))){
+      if(status.text.match(regex(r"@")) || status.text.match(regex(r"^@")))
         writeln("[parseStatus] - Ignore this status");
-      } else {
+      else {
         writeln("[parseStatus] - [check pattern] => ", pattern);
-        if(match(status.text, regex(r"" ~ convWithPattern(pattern["regex"], ["BOTNAME" : "てふてふ"]).removechars("/")))){
+        if(match(status.text, regex(r"" ~ convWithPattern(pattern["regex"],
+                                    ["BOTNAME" : "てふてふ"]).removechars("/")))){
           writeln("[parseStatus] -> found pattern => ", pattern);
-          writeln("@" ~ status.user["screen_name"] ~ " " ~ convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]), status.in_reply_to_status_id);
-          tweet("@" ~ status.user["screen_name"] ~ " " ~ convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]), status.in_reply_to_status_id);
+          writeln("@" ~ status.user["screen_name"] ~ " " ~ 
+                  convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]),
+                  status.in_reply_to_status_id);
+          tweet("@" ~ status.user["screen_name"] ~ " " ~
+                convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]),
+                status.in_reply_to_status_id);
         }
       }
     }
@@ -119,10 +121,12 @@ class Reply{
     writeln("[start replyParse]");
     foreach(pattern; reactionPattern){
       writeln("[replyParse] - [check pattern] => ", pattern);
-      if(match(status.text, regex(r"" ~ convWithPattern(pattern["regex"], ["BOTNAME" : "てふてふ"]).removechars("/")))){
+      if(match(status.text, regex(r"" ~ 
+              convWithPattern(pattern["regex"], ["BOTNAME" : "てふてふ"]).removechars("/")))){
         writeln("[replyParse] -> found pattern => ", pattern);
-        tweet("@" ~ status.user["screen_name"] ~ " " ~ convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]));
-        break;
+        tweet("@" ~ status.user["screen_name"] ~ " " ~
+              convWithPattern(pattern["text"], ["USERNAME" : status.user["name"]]));
+        return;
       }
     }
 
@@ -132,7 +136,7 @@ class Reply{
              city;
       bool findFlag;
 
-      foreach(ePref, cities; weather.prefs){
+      foreach(ePref, cities; weather.prefs)
         foreach(eCity; cities.keys){
           if(match(status.text, regex(r"" ~ eCity))){
             pref = ePref;
@@ -143,22 +147,20 @@ class Reply{
           if(findFlag)
             break;
         }
-      }
 
-      if(!findFlag){//NotFound the place
+      if(!findFlag)//NotFound the place
         tweet("@" ~ status.user["screen_name"] ~ "地名が登録されていないよ！><", status.in_reply_to_status_id);
-      } else {
+      else {
         string[] dateLabels = ["今日", "明日", "明後日"];
         string dateLabel    = "今日";
         Weather weatherStruct;
-        foreach(date; dateLabels){
+        foreach(date; dateLabels)
           if(match(status.text, regex(r"" ~ date))){
             dateLabel = date;
             break;
           }
-        }
 
-        foreach(forecast; getJsonValueData(weather.getWeatherData(pref, city), "forecasts").array){
+        foreach(forecast; getJsonValueData(weather.getWeatherData(pref, city), "forecasts").array)
           if(getJsonData(forecast, "dateLabel") == dateLabel){
             weatherStruct.place = pref ~ city;
             weatherStruct.date  = dateLabel ~ "(" ~ getJsonData(forecast, "date") ~ ")";
@@ -169,12 +171,14 @@ class Reply{
               ? "null" : getJsonDataWithPath(forecast, "temperature/min/celsius").removechars("\"");
 
             //generateTweet
-            tweet("@" ~  status.user["screen_name"] ~ " " ~ weatherStruct.place ~ "の" ~ weatherStruct.date ~ "の天気は" ~ weatherStruct.weather
-                ~ (weatherStruct.tempMax == "null" || weatherStruct.tempMin == "null"
-                  ? "です♪" : "で 最高気温/最低気温は" ~ weatherStruct.tempMax ~ "/" ~ weatherStruct.tempMin ~ " です♪"), status.in_reply_to_status_id);
+            tweet("@" ~  status.user["screen_name"] ~ " "
+                ~ weatherStruct.place ~ "の" ~ weatherStruct.date ~ "の天気は" ~ weatherStruct.weather
+                ~ (weatherStruct.tempMax == "null" || weatherStruct.tempMin == "null" ?
+                    "です♪" :
+                    "で 最高気温/最低気温は" ~ weatherStruct.tempMax ~ "℃/" ~ weatherStruct.tempMin ~ "℃ です♪"),
+                status.in_reply_to_status_id);
             break;
           }
-        }
       }
       return;
     } else if(match(status.text, regex(r"おみくじ"))){
